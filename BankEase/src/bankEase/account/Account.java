@@ -1,6 +1,7 @@
 package bankEase.account;
 
 import java.util.Random;
+import java.util.Scanner;
 
 import bankEase.owner.Owner;
 
@@ -8,9 +9,13 @@ import bankEase.owner.Owner;
  * Class Account to perform various functionalities on an account
  * like depositing, withdrawing, updating information, check balance,
  * transferring funds, etc.
+ * @author Srivathsa Mantrala
  */
 public class Account {
 
+	/** Static variable to create an account with minimum balance */
+	private static final double MIN_BALANCE = 1000.0;
+	
 	/** Field to store the account number */
 	private int accNo;
 	
@@ -26,13 +31,17 @@ public class Account {
 	/** Field to check if the account is a joint account or not */
 	private boolean isJoint;
 	
+	/** Field to track the current state of the account */
 	private AccountState state;
 	
+	/** Final field for check account state */
 	private final AccountState checkAccountState = new checkAccount();
 	
+	/** Final field for deposit state */
 	private final AccountState depositState = new Deposit();
 	
-	private final AccountState withdrawState = new Withdraw();
+	/** Final field for withdraw state */
+	private final Withdraw withdrawState = new Withdraw();
 		
 	/**
 	 * Constructor to create an account with a single owner
@@ -41,12 +50,12 @@ public class Account {
 	 * @param minBalance minimum balance to create the account
 	 * @param phone phone number of owner
 	 */
-	public Account(String owner, String address, double minBalance, int phone)
+	public Account(String owner, String address, int phone)
 	{
 		Random r = new Random();
 		int random = r.nextInt(99999);
 		this.accNo = random;
-		setBalance(minBalance);
+		this.balance = MIN_BALANCE;
 		this.owner = new Owner(owner, phone, address);
 		setJoint(false);
 		this.state = checkAccountState;
@@ -62,27 +71,15 @@ public class Account {
 	 * @param phoneO primary owner's phone number
 	 * @param phoneJO secondary owner's phone number
 	 */
-	public Account(String ownerO, String ownerJO, String addressJO, String addressO, double minBalance, int phoneO, int phoneJO)
+	public Account(String ownerO, String ownerJO, String addressJO, String addressO, int phoneO, int phoneJO)
 	{
 		Random r = new Random();
 		int random = r.nextInt(99999);
 		this.accNo = random;
-		setBalance(minBalance);
+		this.balance = MIN_BALANCE;
 		this.owner = new Owner(ownerO, phoneO, addressO);
 		this.jointOwner = new Owner(ownerJO, phoneJO, addressJO);
 		setJoint(true);
-	}
-	
-	/**
-	 * Method to set minimum balance in the account
-	 * @param balance minimum balance
-	 * @throws IllegalArgumentException if the given balance is less than $1000
-	 */
-	public void setBalance(double balance)
-	{
-		if(balance < 1000)
-			throw new IllegalArgumentException("Minimum Balance required in account- $1000");
-		this.balance = balance;
 	}
 	
 	/**
@@ -139,20 +136,70 @@ public class Account {
 		return this.balance;
 	}
 	
+	public void updateState(String command)
+	{
+		this.state.command(command);
+	}
+	
 	private interface AccountState
 	{
 		void command(String command);
 	}
 	
-	private class checkAccount implements AccountState
+	private abstract class Functionalities implements AccountState
+	{
+		public void depositMoney(double money) 
+		{
+			Scanner sc = new Scanner(System.in);
+			System.out.println("Enter money to be deposited");
+			money = sc.nextDouble();
+			balance += money;
+			sc.close();
+		}
+		
+		public void withdrawMoney(double money)
+		{
+			Scanner sc = new Scanner(System.in);
+			if(balance - money < MIN_BALANCE)
+			{
+				sc.close();
+				throw new IllegalArgumentException("Cannot withdraw money.");
+			}
+			else
+				balance -= money;
+			sc.close();
+		}
+		
+		public void showBalance()
+		{
+			System.out.println("Available balance: " + balance);
+		}
+	}
+	private class checkAccount extends Functionalities
 	{
 		@Override
 		public void command(String command)
 		{
 			if("Deposit".equals(command))
+			{
+				double money = 0;
+				super.depositMoney(money);
 				state = depositState;
+			}
 			else if("Withdraw".equals(command))
+			{
+				double money = 0;
+				super.withdrawMoney(money);
 				state = withdrawState;
+			}
+			else if("Check Balance".equals(command))
+			{
+				super.showBalance();
+			}
+			else if("Update Information".equals(command))
+			{
+				
+			}
 		}
 	}
 	
