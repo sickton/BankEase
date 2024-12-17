@@ -1,9 +1,18 @@
 package bankEase.owner;
 
+/**
+ * Class to define an owner for the account with required details like name, address and phone
+ * @author Srivathsa Mantrala
+ */
 public class Owner {
 
+	/** Name of the owner */
 	private String name;
+	
+	/** Address of the owner */
 	private String address;
+	
+	/** Phone number of the owner */
 	private int phone;
 	
 	/**

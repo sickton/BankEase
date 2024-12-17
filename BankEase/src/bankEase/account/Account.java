@@ -4,6 +4,11 @@ import java.util.Random;
 
 import bankEase.owner.Owner;
 
+/**
+ * Class Account to perform various functionalities on an account
+ * like depositing, withdrawing, updating information, check balance,
+ * transferring funds, etc.
+ */
 public class Account {
 
 	/** Field to store the account number */
@@ -21,6 +26,14 @@ public class Account {
 	/** Field to check if the account is a joint account or not */
 	private boolean isJoint;
 	
+	private AccountState state;
+	
+	private final AccountState checkAccountState = new checkAccount();
+	
+	private final AccountState depositState = new Deposit();
+	
+	private final AccountState withdrawState = new Withdraw();
+		
 	/**
 	 * Constructor to create an account with a single owner
 	 * @param owner owner of the account
@@ -36,6 +49,7 @@ public class Account {
 		setBalance(minBalance);
 		this.owner = new Owner(owner, phone, address);
 		setJoint(false);
+		this.state = checkAccountState;
 	}
 
 	/**
@@ -123,5 +137,40 @@ public class Account {
 	public double getBalance()
 	{
 		return this.balance;
+	}
+	
+	private interface AccountState
+	{
+		void command(String command);
+	}
+	
+	private class checkAccount implements AccountState
+	{
+		@Override
+		public void command(String command)
+		{
+			if("Deposit".equals(command))
+				state = depositState;
+			else if("Withdraw".equals(command))
+				state = withdrawState;
+		}
+	}
+	
+	private class Deposit implements AccountState
+	{
+		@Override
+		public void command(String command)
+		{
+			
+		}
+	}
+	
+	private class Withdraw implements AccountState
+	{
+		@Override
+		public void command(String command)
+		{
+			
+		}
 	}
 }
