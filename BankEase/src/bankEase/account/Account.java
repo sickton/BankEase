@@ -35,13 +35,16 @@ public class Account {
 	private AccountState state;
 	
 	/** Final field for check account state */
-	private final AccountState checkAccountState = new checkAccount();
+	private final AccountState checkAccountState = new foundAccount();
 	
 	/** Final field for deposit state */
 	private final AccountState depositState = new Deposit();
 	
 	/** Final field for withdraw state */
-	private final Withdraw withdrawState = new Withdraw();
+	private final AccountState withdrawState = new Withdraw();
+	
+	/** Final field for update information state */
+	private final AccountState updateInformationState = new updateInformation();
 		
 	/**
 	 * Constructor to create an account with a single owner
@@ -71,7 +74,7 @@ public class Account {
 	 * @param phoneO primary owner's phone number
 	 * @param phoneJO secondary owner's phone number
 	 */
-	public Account(String ownerO, String ownerJO, String addressJO, String addressO, int phoneO, int phoneJO)
+	public Account(String ownerO, String ownerJO, String addressO, String addressJO, int phoneO, int phoneJO)
 	{
 		Random r = new Random();
 		int random = r.nextInt(99999);
@@ -79,6 +82,7 @@ public class Account {
 		this.balance = MIN_BALANCE;
 		this.owner = new Owner(ownerO, phoneO, addressO);
 		this.jointOwner = new Owner(ownerJO, phoneJO, addressJO);
+		this.state = checkAccountState;
 		setJoint(true);
 	}
 	
@@ -119,6 +123,24 @@ public class Account {
 	}
 	
 	/**
+	 * Method to return the primary owner object
+	 * @return primary owner
+	 */
+	public Owner getPrimaryOwner()
+	{
+		return this.owner;
+	}
+	
+	/**
+	 * Method to return the secondary owner object
+	 * @return secondary owner
+	 */
+	public Owner getSecondaryOwner()
+	{
+		return this.jointOwner;
+	}
+	
+	/**
 	 * Method to return status of account
 	 * @return true if it is a joint account else false
 	 */
@@ -136,18 +158,55 @@ public class Account {
 		return this.balance;
 	}
 	
+	/**
+	 * Method to update state with an initial command
+	 * @param command initial command
+	 */
 	public void updateState(String command)
 	{
 		this.state.command(command);
 	}
 	
+	/**
+	 * Method to represent account details as a string
+	 * @return account detail string
+	 */
+	@Override
+	public String toString()
+	{
+		if(joint())
+		{
+			String s = "Primary Owner :-\n" + owner.getOwnerDetails() + "\nSecondary Owner :-\n" + jointOwner.getOwnerDetails() + "\n";
+			s += "Available balance:- " + this.getBalance() + "\n";
+			return s;
+		}
+		else
+		{
+			String s = owner.getOwnerDetails();
+			s += "Available balance:- " + this.getBalance() + "\n";
+			return s;
+		}
+	}
+	
+	/**
+	 * Interface to handle command separately in each state
+	 */
 	private interface AccountState
 	{
 		void command(String command);
 	}
 	
+	/**
+	 * private class to call all similar functions in the states like
+	 * withdraw, deposit, and updating information
+	 */
 	private abstract class Functionalities implements AccountState
 	{
+		
+		/**
+		 * Method to deposit amount into the account
+		 * @param money to be deposited
+		 */
 		public void depositMoney(double money) 
 		{
 			Scanner sc = new Scanner(System.in);
@@ -157,6 +216,12 @@ public class Account {
 			sc.close();
 		}
 		
+		/**
+		 * Method to withdraw money from the account
+		 * @param money to be withdrawn
+		 * @throws IllegalArgumentException if the money to be withdrawn reduces the
+		 * account balance to less than the minimum balance
+		 */
 		public void withdrawMoney(double money)
 		{
 			Scanner sc = new Scanner(System.in);
@@ -170,12 +235,144 @@ public class Account {
 			sc.close();
 		}
 		
+		/**
+		 * Method to show the balance in the account
+		 */
 		public void showBalance()
 		{
 			System.out.println("Available balance: " + balance);
 		}
+
+		/**
+		 * Method to update information in the account depending
+		 * on the number of owners for the account
+		 */
+		public void updateInformation() 
+		{
+			Scanner sc = new Scanner(System.in);
+			if(joint())
+			{
+				System.out.println("1.Update primary owner details");
+				System.out.println("2.Update secondary owner details");
+				System.out.println("3.Exit");
+				int inp = sc.nextInt();
+				switch(inp)
+				{
+					case 1:
+						this.informationMenu();
+						int opt = sc.nextInt();
+						Owner priOwner = getPrimaryOwner();
+						switch(opt)
+						{
+							case 1:
+								System.out.println("Enter new Name: ");
+								String newName = sc.nextLine();
+								priOwner.setName(newName);
+								break;
+							case 2:
+								System.out.println("Enter new phone number: ");
+								int phone = sc.nextInt();
+								priOwner.setPhone(phone);
+								break;
+							case 3:
+								System.out.println("Enter new address: ");
+								String add = sc.nextLine();
+								priOwner.setAddress(add);
+								break;
+							default:
+								System.out.println("Invalid option selected.");
+								break;
+						}
+						break;
+					case 2:
+						this.informationMenu();
+						int opt1 = sc.nextInt();
+						Owner secOwner = getPrimaryOwner();
+						switch(opt1)
+						{
+							case 1:
+								System.out.println("Enter new Name: ");
+								String newName = sc.nextLine();
+								secOwner.setName(newName);
+								break;
+							case 2:
+								System.out.println("Enter new phone number: ");
+								int phone = sc.nextInt();
+								secOwner.setPhone(phone);
+								break;
+							case 3:
+								System.out.println("Enter new address: ");
+								String add = sc.nextLine();
+								secOwner.setAddress(add);
+								break;
+							default:
+								System.out.println("Invalid option selected.");
+								break;
+						}
+						break;
+					case 3:
+						exiting();
+						break;
+					default:
+						System.out.println("Invalid option selected.");
+						break;
+				}
+				sc.close();
+			}
+			else
+			{
+				this.informationMenu();
+				int opt1 = sc.nextInt();
+				Owner secOwner = getPrimaryOwner();
+				switch(opt1)
+				{
+					case 1:
+						System.out.println("Enter new Name: ");
+						String newName = sc.nextLine();
+						secOwner.setName(newName);
+						break;
+					case 2:
+						System.out.println("Enter new phone number: ");
+						int phone = sc.nextInt();
+						secOwner.setPhone(phone);
+						break;
+					case 3:
+						System.out.println("Enter new address: ");
+						String add = sc.nextLine();
+						secOwner.setAddress(add);
+						break;
+					default:
+						System.out.println("Invalid option selected.");
+						break;
+				}
+				sc.close();
+			}
+		}
+		
+		/**
+		 * Method to display the options for updating information
+		 */
+		public void informationMenu()
+		{
+			System.out.println("1.Update Name");
+			System.out.println("2.Update Phone Number");
+			System.out.println("3.Update Address");
+		}
+
+		/**
+		 * Message to display on exiting with appropriate information
+		 */
+		public void exiting() 
+		{
+			System.out.println("Thank you for using the application!");
+			System.exit(0);
+		}
 	}
-	private class checkAccount extends Functionalities
+	
+	/**
+	 * Class to handle commands when the account is present in bank
+	 */
+	private class foundAccount extends Functionalities
 	{
 		@Override
 		public void command(String command)
@@ -198,26 +395,58 @@ public class Account {
 			}
 			else if("Update Information".equals(command))
 			{
-				
+				super.updateInformation();
+				state = updateInformationState;
+			}
+			else if("Exit".equals(command))
+			{
+				super.exiting();
 			}
 		}
 	}
 	
-	private class Deposit implements AccountState
+	/**
+	 * Class to handle commands after depositing the amount in account
+	 */
+	private class Deposit extends Functionalities
 	{
 		@Override
 		public void command(String command)
 		{
-			
+			if("Exit".equals(command))
+			{
+				super.exiting();
+			}
 		}
 	}
 	
-	private class Withdraw implements AccountState
+	/**
+	 * Class to handle commands after withdrawing the amount from account
+	 */
+	private class Withdraw extends Functionalities
 	{
 		@Override
 		public void command(String command)
 		{
-			
+			if("Exit".equals(command))
+			{
+				super.exiting();
+			}
+		}
+	}
+	
+	/**
+	 * Class to handle commands after updating the information of the account owners
+	 */
+	private class updateInformation extends Functionalities
+	{
+		@Override
+		public void command(String command)
+		{
+			if("Exit".equals(command))
+			{
+				super.exiting();
+			}
 		}
 	}
 }

@@ -25,7 +25,7 @@ public class Owner {
 	{
 		setName(name);
 		setPhone(phone);
-		this.address = address;
+		setAddress(address);
 	}
 	
 	/**
@@ -71,6 +71,15 @@ public class Owner {
 		{
 			this.phone = phone;
 		}
+	}
+	
+	/**
+	 * Method to set the address of the owner
+	 * @param address of the owner
+	 */
+	public void setAddress(String address) 
+	{
+		this.address = address;
 	}
 	
 	/**
